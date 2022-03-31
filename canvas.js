@@ -12,7 +12,7 @@ VDG_ATTRIBUTE_COLOR:1,
 VDG_ATTRIBUTE_NORMAL:2,
 VDG_ATTRIBUTE_TEXTURE0:3,
 };
-
+var startedSystem = false
 var vertexShaderObject;
 var fragmentShaderObject;
 var shaderProgramObject;
@@ -21,18 +21,22 @@ var vaoSqaure;
 var vaoTriangle;
 var vboPosition;
 var vboTexture;
+var textureIndex = 0;
 
 var mvpUniform;
 var uniform_texture0_sampler;
-var uniform_texture1_sampler;
 
 var perspectiveProjectionMatrix;
 
-var pyramidTexture;
 var cube1Texture, cube2Texture;
-
-var anglePyramid =0.0;
+var textures = [
+    {"image": "1.jpg", "face": "front"}, {"image": "2.jpg", "face": "back"}, {"image": "3.jpg", "face": "left"}, {"image": "4.jpg", "face": "right"},
+    {"image": "5.jpg", "face": "front"},{"image": "6.jpg", "face": "back"},{"image": "7.jpg", "face": "left"},{"image": "8.jpg", "face": "right"},
+    {"image": "9.jpg", "face": "front"},
+]
+const texturesData = []
 var angleCube=0.0;
+var startScene = false
 
 // To start animation : To have requestAnimationFrame() to be called "cross-browser" compatible
 var requestAnimationFrame =
@@ -53,6 +57,12 @@ window.msCancelRequestAnimationFrame || window.msCancelAnimationFrame;
 // onload function
 function main()
 {
+    sounds = document.getElementById("myAudio")
+    sounds.onplay = function() {
+        console.log("started")
+        startedSystem = true
+        toggleFullScreen();
+    };
     // get <canvas> element
     canvas = document.getElementById("amc");
     if(!canvas) {
@@ -76,6 +86,15 @@ function main()
     // start drawing here as warming-up
     resize();
     draw();
+}
+
+function increaseIndex(value) {
+    var total = (textureIndex+value+3)
+    console.log("Current, New Total", textureIndex, total)
+    if (total < texturesData.length) {
+        textureIndex = textureIndex + value;
+        console.log(textureIndex)
+    }
 }
 
 function init()
@@ -168,7 +187,6 @@ function init()
     // get MVP uniform location
     mvpUniform = gl.getUniformLocation(shaderProgramObject, "u_mvp_matrix");
     uniform_texture0_sampler = gl.getUniformLocation(shaderProgramObject,"u_texture0_sampler");
-    uniform_texture1_sampler = gl.getUniformLocation(shaderProgramObject,"u_texture1_sampler");
     
     // vertices, colors, shader attribs, vbo, vao initializations
     var squareVertices = new Float32Array([
@@ -238,15 +256,15 @@ function init()
         0.0, 0.0,
         1.0, 0.0,
         
-        1.0, 0.0,
-        0.0, 0.0,
         1.0, 1.0,
         0.0, 1.0,
+        0.0, 0.0,
+        1.0, 0.0,
         
-        0.0, 0.0,
-        1.0, 0.0,
         1.0, 1.0,
         0.0, 1.0,
+        0.0, 0.0,
+        1.0, 0.0,
     ]);
     
     vboTexture = gl.createBuffer();
@@ -261,34 +279,16 @@ function init()
 
     gl.bindVertexArray(null);   
     
-    cube1Texture = gl.createTexture();
-    cube1Texture.image = new Image();
-    cube1Texture.image.src = "1.jpg";
-    cube1Texture.image.onload = function ()
-    {
-        gl.bindTexture(gl.TEXTURE_2D, cube1Texture);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cube1Texture.image);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-    };
-
-    cube2Texture = gl.createTexture();
-    cube2Texture.image = new Image();
-    cube2Texture.image.src = "2.png";
-    cube2Texture.image.onload = function ()
-    {
-        gl.bindTexture(gl.TEXTURE_2D, cube2Texture);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cube2Texture.image);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-    };
+    texturesData.push(getColorTextured("front"))
+    texturesData.push(getColorTextured("back"))
+    texturesData.push(getColorTextured("left"))
+    texturesData.push(getColorTextured("right"))
+    textures.forEach(function(value) {
+        texturesData.push(getTextAndCords(value.image, value.face))
+    });
 
     // set clear color
-    gl.clearColor(0.0, 0.0, 0.0, 1.0); // black
+     gl.clearColor(143.0/255.0, 148.0/255.0, 149.0/255.0, 1.0);
     
     // Depth test will always be enabled
     gl.enable(gl.DEPTH_TEST);
@@ -305,8 +305,8 @@ function resize()
     // code
     if(bFullscreen == true)
     {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth-300;
+        canvas.height = window.innerHeight-300;
     }
     else
     {
@@ -316,7 +316,7 @@ function resize()
    
     // set the viewport to match
     gl.viewport(0, 0, canvas.width, canvas.height);
-    mat4.perspective(perspectiveProjectionMatrix, 45.0, parseFloat(canvas.width) / parseFloat(canvas.height), .001,10);
+    mat4.perspective(perspectiveProjectionMatrix,45.0, parseFloat(canvas.width) / parseFloat(canvas.height), 0.1, 100.0);
 }
 
 x=0.0
@@ -324,17 +324,109 @@ y=0.0
 z=-5.0
 toggle = false
 
+function getTextAndCords(image, index) {
+    var cubeTexture = gl.createTexture();
+    cubeTexture.image = new Image();
+    cubeTexture.image.src = image;
+    cubeTexture.image.onload = function ()
+    {
+        gl.bindTexture(gl.TEXTURE_2D, cubeTexture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cubeTexture.image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+    };
 
-a = 0
-s = 0
-d = 0
-w = 0
+    var position
+    switch(index)
+    {
+        case "front":
+            position = [8, 4]
+            break;
+        case "back":
+            position = [12, 4]
+            break;
+        case "left":
+            position = [16, 4]
+            break;
+        case "right":
+            position = [20, 4]
+            break;
+    }
+
+    return {texture: cubeTexture, cords: position }
+}
+
+function getColorTextured(index) {
+    whiteTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, whiteTexture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(makeWhiteImage()));
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+
+    var position
+    switch(index)
+    {
+        case "front":
+            position = [8, 4]
+            break;
+        case "back":
+            position = [12, 4]
+            break;
+        case "left":
+            position = [16, 4]
+            break;
+        case "right":
+            position = [20, 4]
+            break;
+    }
+
+    return {texture: whiteTexture, cords: position }
+}
+
+function makeWhiteImage() {
+    var i, j, c, heightIndex, widthIndex, postion;
+    var checkImageWidth, checkImageHeight;
+    var checkImage;
+
+    checkImageWidth = 64;
+    checkImageHeight = 64;
+    checkImage = [checkImageWidth * checkImageWidth];
+
+    for (i = 0; i < checkImageHeight; i++)
+	{
+		heightIndex = i * checkImageWidth * 4;
+        for (j = 0; j < checkImageWidth; j++)
+		{
+			widthIndex = j * 4;
+			postion = heightIndex + widthIndex;
+
+			c = 255;
+
+			checkImage[postion + 0] = c;
+			checkImage[postion + 1] = c;
+			checkImage[postion + 2] = c;
+			checkImage[postion + 3] = 255;
+		}
+    }
+    
+    return checkImage;
+}
 
 function draw()
 {
     // code
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
+    if(startedSystem == false) {
+        requestAnimationFrame(draw, canvas);
+        return
+    }
+
     gl.useProgram(shaderProgramObject);
     
     // square
@@ -358,24 +450,42 @@ function draw()
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
     gl.drawArrays(gl.TRIANGLE_FAN, 4, 4);
 
-    gl.bindTexture(gl.TEXTURE_2D, cube1Texture);
+    gl.bindTexture(gl.TEXTURE_2D, texturesData[textureIndex+3].texture);
     gl.uniform1i(uniform_texture0_sampler, 0);
-    gl.drawArrays(gl.TRIANGLE_FAN, 8, 4);
+    gl.drawArrays(gl.TRIANGLE_FAN, texturesData[textureIndex+3].cords[0], texturesData[textureIndex+3].cords[1]);
 
-    gl.bindTexture(gl.TEXTURE_2D, cube2Texture);
+    gl.bindTexture(gl.TEXTURE_2D, texturesData[textureIndex+2].texture);
     gl.uniform1i(uniform_texture0_sampler, 0);
-    gl.bindVertexArray(vaoSqaure);
-    gl.drawArrays(gl.TRIANGLE_FAN, 12, 4);
+    gl.drawArrays(gl.TRIANGLE_FAN, texturesData[textureIndex+2].cords[0], texturesData[textureIndex+2].cords[1]);
+
+    gl.bindTexture(gl.TEXTURE_2D, texturesData[textureIndex+1].texture);
+    gl.uniform1i(uniform_texture0_sampler, 0);
+    gl.drawArrays(gl.TRIANGLE_FAN, texturesData[textureIndex+1].cords[0], texturesData[textureIndex+1].cords[1]);
+
+    gl.bindTexture(gl.TEXTURE_2D, texturesData[textureIndex+0].texture);
+    gl.uniform1i(uniform_texture0_sampler, 0);
+    gl.drawArrays(gl.TRIANGLE_FAN, texturesData[textureIndex+0].cords[0], texturesData[textureIndex+0].cords[1]);
+
+    angleCube = angleCube + 0.155;
+    if(angleCube >= 360.0)
+        angleCube = angleCube-360.0;
+
+    if (z >= -1 && !startScene) {
+        startScene = true
+        angleCube = 0.0
+        increaseIndex(4)
+        setInterval(function() {
+            increaseIndex(1)
+        }, 1000*10);
+    }
 
     gl.bindVertexArray(null);
     
     gl.useProgram(null);
     
-    angleCube = angleCube+0.05;
-    if(angleCube >= 360.0)
-        angleCube = angleCube-360.0;
+  
     
-    if (z < -1)
+    if (z <= -1)
         z = z + 0.002
     
     // animation loop
@@ -384,16 +494,16 @@ function draw()
 
 function uninitialize()
 {
-    if(pyramidTexture)
-    {
-        gl.deleteTexture(pyramidTexture);
-        pyramidTexture = 0;
-    } 
 
-    if(cube1Texture)
+    if(texturesData)
     {
-        gl.deleteTexture(cube1Texture);
-        cube1Texture = 0;
+        texturesData.forEach(function(data, index) {
+            if (!data) {
+                return
+            } 
+            gl.deleteTexture(texturesData[index].texture);
+            texturesData[index].texture = 0;    
+        })
     } 
     
     // code
