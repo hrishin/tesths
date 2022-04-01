@@ -102,6 +102,11 @@ function init()
     // code
     // get WebGL 2.0 context
     gl = canvas.getContext("webgl2");
+    var isWebGL2 = !!gl;
+    if(!isWebGL2) {
+        document.getElementById('info').innerHTML = 'WebGL 2 is not available.';
+        return;
+    }
     if(gl == null) // failed to get context
     {
         console.error("Failed to get the rendering context for WebGL");
@@ -316,7 +321,7 @@ function resize()
    
     // set the viewport to match
     gl.viewport(0, 0, canvas.width, canvas.height);
-    mat4.perspective(perspectiveProjectionMatrix,45.0, parseFloat(canvas.width) / parseFloat(canvas.height), .001, 100.0);
+    mat4.perspective(perspectiveProjectionMatrix, 45.0, parseFloat(canvas.width) / parseFloat(canvas.height), .01, 100.0);
 }
 
 function getTextAndCords(image, index) {
