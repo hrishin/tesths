@@ -31,8 +31,8 @@ var perspectiveProjectionMatrix;
 var cube1Texture, cube2Texture;
 var textures = [
     {"image": "1.jpg", "face": "front"}, {"image": "2.jpg", "face": "back"}, {"image": "3.jpg", "face": "left"}, {"image": "4.jpg", "face": "right"},
-    {"image": "5.jpg", "face": "front"},{"image": "6.jpg", "face": "back"},{"image": "7.jpg", "face": "left"},{"image": "8.jpg", "face": "right"},
-    {"image": "9.jpg", "face": "front"},
+    {"image": "5.jpg", "face": "front"},{"image": "10.jpg", "face": "left"}, {"image": "6.jpg", "face": "back"},{"image": "7.jpg", "face": "left"},{"image": "8.jpg", "face": "right"},
+    {"image": "9.jpg", "face": "front"},{"image": "11.gif", "face": "back"},
 ]
 const texturesData = []
 var angleCube=0.0;
@@ -316,13 +316,8 @@ function resize()
    
     // set the viewport to match
     gl.viewport(0, 0, canvas.width, canvas.height);
-    mat4.perspective(perspectiveProjectionMatrix,45.0, parseFloat(canvas.width) / parseFloat(canvas.height), 0.1, 100.0);
+    mat4.perspective(perspectiveProjectionMatrix,45.0, parseFloat(canvas.width) / parseFloat(canvas.height), .001, 100.0);
 }
-
-x=0.0
-y=0.0
-z=-5.0
-toggle = false
 
 function getTextAndCords(image, index) {
     var cubeTexture = gl.createTexture();
@@ -418,6 +413,19 @@ function makeWhiteImage() {
     return checkImage;
 }
 
+toggle = false
+x=0.0
+y=-2.5
+z=-5.0
+aa=0
+ss=0.8450000000000009
+dd=1
+
+yLimit1=-0.11000000000003118
+yLimit2=0.5650000000000004
+zLimit=0.03699999999967128
+ssLimit1=-0.3590000000000001
+
 function draw()
 {
     // code
@@ -431,20 +439,19 @@ function draw()
     
     // square
     modelViewMatrix = mat4.create();
-    modelViewProjectionMatrix = mat4.create();
-    var lookAtMatrix=mat4.create();
-    let eye=vec3.fromValues(0,0,1);
-    let center=vec3.fromValues(-1,0,0);
-    let up=vec3.fromValues(0,-0.5,0);
-    mat4.lookAt(lookAtMatrix,eye,center,up);
+    var lookAtMatrix = mat4.create();
+    let eye = vec3.fromValues(aa, ss, dd);
+    let center = vec3.fromValues(0,0,0);
+    let up = vec3.fromValues(0,1,0);
+    mat4.lookAt(lookAtMatrix, eye, center, up);
 
     mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, z]);
     //mat4.rotateX(modelViewMatrix ,modelViewMatrix, degToRad(angleCube));
     mat4.rotateY(modelViewMatrix ,modelViewMatrix, degToRad(angleCube));
     //mat4.rotateZ(modelViewMatrix ,modelViewMatrix, degToRad(angleCube));
-    mat4.multiply(modelViewProjectionMatrix,lookAtMatrix, modelViewMatrix);
-    mat4.multiply(modelViewProjectionMatrix, perspectiveProjectionMatrix, modelViewMatrix);
-    gl.uniformMatrix4fv(mvpUniform, false, modelViewProjectionMatrix);
+    mat4.multiply(modelViewMatrix, lookAtMatrix, modelViewMatrix);
+    mat4.multiply(modelViewMatrix, perspectiveProjectionMatrix, modelViewMatrix);
+    gl.uniformMatrix4fv(mvpUniform, false, modelViewMatrix);
 
     gl.bindVertexArray(vaoSqaure);
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
@@ -470,7 +477,7 @@ function draw()
     if(angleCube >= 360.0)
         angleCube = angleCube-360.0;
 
-    if (z >= -1 && !startScene) {
+    if (z >= zLimit && !startScene) {
         startScene = true
         angleCube = 0.0
         increaseIndex(4)
@@ -479,15 +486,23 @@ function draw()
         }, 1000*10);
     }
 
+    if (z <= zLimit)
+        z = z + 0.002
+    if (y <= yLimit1)
+        y = y + 0.001
+    if(y >= yLimit1 && y <= yLimit2 && startScene) {
+        y = y + 0.002
+    }
+
+    if(ss >= ssLimit1 && startScene) {
+        ss=ss-0.003
+    }
+
     gl.bindVertexArray(null);
-    
     gl.useProgram(null);
     
-  
-    
-    if (z <= -1)
-        z = z + 0.002
-    
+    //console.log("x, y, z", x, y, z)
+    //console.log("a, s, d", aa, ss, dd)
     // animation loop
     requestAnimationFrame(draw, canvas);
 }
@@ -621,6 +636,21 @@ function keyDown(event)
         case 90://z
             t = toggle ? 0.005 : -0.005;
             z = z + t;
+            break;
+
+        case 65://x
+            t = toggle ? 0.005 : -0.005;
+            aa = aa + t;
+            break;
+
+        case 83://y
+            t = toggle ? 0.005 : -0.005;
+            ss = ss + t;
+            break;
+
+        case 68://z
+            t = toggle ? 0.005 : -0.005;
+            dd = dd + t;
             break;
     }
 }
