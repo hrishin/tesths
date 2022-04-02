@@ -1,38 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-    <!-- head -->
-    <head>
-        <meta charset="UTF-8" />
-        <title>We met for a purpose :) </title>
-        <style>
-            body {background-color: rgb(143 148 149);}
-            .control {
-                display: block;
-                margin-left: auto;
-                margin-right: auto;
-                width: 30%;
-            }
-            .render {
-                display: block;
-                margin-left: auto;
-                margin-right: auto;
-            }
-        </style>
-    </head>
-    
-    <!-- body -->
-    <body onload="main()">
-        <audio id="myAudio" autoplay src="song.mp3" controls class="control" loop>
-            Your browser does not support the audio element.
-        </audio>
-        <canvas id="amc" width="1120" height="840" class="render">
-            Your Browser Does Not Support HTML5 Canvas Element
-        </canvas>
-        <!-- script -->
-        <script src="gl-matrix-min.js"></script>
-        <script src="canvas.js"></script>
-        <css>
-            
-        </css>
-    </body>
+<html>
+  <head>
+    <meta charset=UTF-8 />
+    <title>We met for a reason :) </title>
+    <style>
+        body {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+  </head>
+  <body>
+        <canvas class="webgl"></canvas>
+        <script type="module" src="index.js"></script>
+  </body>
 </html>
