@@ -10,10 +10,39 @@
             margin: 0;
             overflow: hidden;
         }
+        .info {
+            color: #7a7676;
+            display: block;
+            text-align: center;
+        }
+        h1.info {
+            margin: 75px auto 10px;
+            width: 353px;
+            font-size: 40px;
+            padding-top: 50px;
+        }
+        h2.info {
+            margin: 10px auto 10px;
+            font-size: 30px;
+            padding: 0 395px;
+        }
+        .hide {
+            display: none;
+        }
     </style>
   </head>
   <body>
-        <canvas class="webgl"></canvas>
+        <h1 class="info">Dear Beatrice 🙂</h1>
+        <h2 class="info">Before we came and after leaving this world we are going to alone ourself, the time we got here to spend with dear ones.
+          People cross the path for a reason. 
+          Grazie per essere nella vita, always stay happy 🤗. <br/> Click or tap anywhere to see something wonderful☝.</h2>
+        
+        <h1 class="loading info hide">Great thing takes time..please wait 🙂😜</h1>
+        <canvas class="webgl hide"></canvas>
+        <video id="video" loop crossOrigin="anonymous" playsinline style="display:none">
+          <source src="night.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+        </video>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
         <script type="module" src="index.js"></script>
   </body>
 </html>

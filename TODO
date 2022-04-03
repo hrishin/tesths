@@ -1,0 +1,22 @@
+- textures and story
+- camera and direction
+- add audio control, tap to start
+- fullscreen and resize
+- password and protection
+
+
+back, right -> {x: 2.5, y: 5, z: 2.5}
+back, left ->  {x: -2.5, y: 5, z: 2.5}
+font, right -> {x: 2.5, y: 5, z: -2.5}
+front, left ->  {x: -2.5, y: 5, z: -2.5}
+
+
+if not (font, right) && (font, left) {
+    update front;
+} else if not (font, right) && (back, right) {
+    update left;
+} else if not (back, right) && (back, left) {
+    update back;
+} else if not (back, left) && (front, right) {
+    update right;
+}
