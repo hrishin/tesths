@@ -1,5 +1,6 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136.0/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
+import {OrbitControls} from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls.js';
 
 var textures = ['1.jpg', '2.jpg', '22.jpg', '7.jpg', '3.jpg', '4.jpg', '10.jpg', '5.jpg', '6.jpg', '9.jpg', '28.png', '11.jpg', '8.jpg', '25.jpg', '12.jpg', '13.jpg', '14.jpg', '15.jpg', '16.jpg', '27.jpg', '17.jpg', '18.jpg', '19.jpg', '29.jpg', '20.jpg', '21.jpg'];
 // var textures = ['1.jpg', '2.jpg', '3.jpg','4.jpg'];
@@ -65,6 +66,8 @@ function main() {
   })
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const controls = new OrbitControls( camera, renderer.domElement );
+  controls.listenToKeyEvents( window );
 
   // axes
   // scene.add( new THREE.AxisHelper( 20 ) );
@@ -230,6 +233,7 @@ function main() {
     camera.position.set(x, y, z)
     camera.up = new THREE.Vector3(0,1,0);
     camera.lookAt(new THREE.Vector3(aa,ss,dd));
+    controls.update();
   } 
 
   function animate() {
