@@ -1,12 +1,34 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136.0/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
 
-var textures = ['1.jpg', '2.jpg', '3.jpg','4.jpg', '5.jpg', '6.jpg','7.jpg', '8.jpg', '9.jpg','10.jpg', '11.jpg',
-              '12.jpg', '13.jpg','14.jpg', '15.jpg', '16.jpg','17.jpg', '18.jpg', '19.jpg','20.jpg', '21.jpg'];
+var textures = ['1.jpg', '2.jpg', '22.jpg', '7.jpg', '3.jpg', '4.jpg', '10.jpg', '5.jpg', '6.jpg', '9.jpg', '28.png', '11.jpg', '8.jpg', '25.jpg', '12.jpg', '13.jpg', '14.jpg', '15.jpg', '16.jpg', '27.jpg', '17.jpg', '18.jpg', '19.jpg', '29.jpg', '20.jpg', '21.jpg'];
 // var textures = ['1.jpg', '2.jpg', '3.jpg','4.jpg'];
 var texture;
-var x = -0.140, y=0.610, z=2.16499, aa=0, ss=1.3049, dd=0, toggle=false, t, allTextures, song;
+//var x = -0.140, y=0.610, z=2.16499, aa=0, ss=1.3049, dd=0, toggle=false, t, allTextures, song;
+var x = -0.14, y=9.910000000000007, z=-9.485010000000003, aa=0, ss=1.3049, dd=0, toggle=false, t, allTextures, song;
+const transition1 = {
+  x: -0.14,
+  y: 1.910000000000001, 
+  z:-1.3350100000000014,
+  aa: 0,
+  ss: 1.3049,
+  dd: 0,
+  done: false
+}
+
+const transition2 = {
+  x: -0.14,
+  y: 0.700, 
+  z: 2.16499,
+  aa: 0,
+  ss: 1.3049,
+  dd: 0,
+  done: false
+}
+
 const SPEED = 0.0015;
+const trans = 0.05;
+
 //seconds
 const FIRST_ROTATION = 30;
 const NEXT_ROTATIONS = 19;
@@ -23,6 +45,7 @@ window.addEventListener('load', function() {
   $(document).on('click', function () { 
     $(".info").hide();
     $("h1.loading").show();
+    $(document).unbind('click');
     main();
   });
 });
@@ -31,7 +54,7 @@ function main() {
   var world;
   const canvas = document.querySelector(".webgl");
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xffffff );
+  scene.background = new THREE.Color('rgb(175, 187, 196)');
 
   const camera = new THREE.PerspectiveCamera(75, sizes.width/sizes.height, 0.1, 1000);
   scene.add(camera);
@@ -55,6 +78,8 @@ function main() {
 
   const video = document.getElementById( 'video' );
   video.play();
+  const video1 = document.getElementById( 'video1' );
+  video1.play();
 
   Promise.all([
     loader.loadAsync('me_1.glb'),
@@ -85,13 +110,13 @@ function main() {
     .then((results) => {
       texture = new THREE.MeshLambertMaterial({map: new THREE.VideoTexture( video ), side: THREE.DoubleSide});
       allTextures = results.map(function(t){ return new THREE.MeshStandardMaterial({map: t, side: THREE.DoubleSide})})
-      console.log('loaded all textures', allTextures);
+      allTextures.push(new THREE.MeshLambertMaterial({map: new THREE.VideoTexture( video1 ), side: THREE.DoubleSide}))
+      //console.log('loaded all textures', allTextures);
       $(".webgl").show();
       $("h1.loading").hide();
       startAudio();
       startScene();
       animate();
-      setupTextureRefresh();
     })
     .catch((err) => {
       console.log(err);
@@ -137,10 +162,55 @@ function main() {
     world.position.set(0, 2.5, 0);
     world.renderOrder = 1; // force to render gray cube first
     scene.add( world );
+  }
 
+  function transition1Action() {
+    if (transition1.done == true) {
+      return
+    }
+
+    if (transition1.y >= y && transition1.z <= z) {
+      console.log("tran 1");
+      transition1.done = true;
+    }
+    
+    if (transition1.y < y) {
+      y = y - 0.005;
+    }
+    if (transition1.z > z) {
+      z = z + 0.005;
+    }
+  }
+
+  function transition2Action() {
+    if (transition2.done == true) {
+      return
+    }
+
+    if (transition1.done != true) {
+      return
+    }
+
+    if (z >= transition2.z && y <= transition2.y) {
+      console.log("tran 2");
+      transition2.done = true;
+      setupTextureRefresh();
+    }
+
+    if (y > transition2.y) {
+      y = y - 0.002;
+    }
+    
+    if (z < transition2.z) {
+      z = z + 0.005;
+    }
   }
 
   function updateCube() {
+    if (transition2.done != true) {
+      return
+    }
+
     world.rotation.y -= SPEED * 1;
     
     const materials = [
@@ -164,6 +234,8 @@ function main() {
 
   function animate() {
     requestAnimationFrame(animate);
+    transition1Action();
+    transition2Action();
     updateCube();
     cameraUpdate();
 
@@ -198,8 +270,6 @@ function main() {
     } else {
       currentRotor = nextRotor;    
     }
-
-    
   }
 
   function keyDown(event)
@@ -212,32 +282,32 @@ function main() {
               break;
 
           case 88://x
-              t = toggle ? 0.005 : -0.005;
+              t = toggle ? trans : -trans;
               x = x + t;
               break;
 
           case 89://y
-              t = toggle ? 0.005 : -0.005;
+              t = toggle ? trans : -trans;
               y = y + t;
               break;
 
           case 90://z
-              t = toggle ? 0.005 : -0.005;
+              t = toggle ? trans: -trans;
               z = z + t;
               break;
 
           case 65://aa
-              t = toggle ? 0.005 : -0.005;
+              t = toggle ? trans : -trans;
               aa = aa + t;
               break;
 
           case 83://ss
-              t = toggle ? 0.005 : -0.005;
+              t = toggle ? trans : -trans;
               ss = ss + t;
               break;
 
           case 68://dd
-              t = toggle ? 0.005 : -0.005;
+              t = toggle ? trans : -trans;
               dd = dd + t;
               break;
       }
