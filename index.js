@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136.0/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
 
-var textures = ['1.jpg', '2.jpg', '22.jpg', '7.jpg', '3.jpg', '4.jpg', '10.jpg', '5.jpg', '6.jpg', '9.jpg', '28.png', '11.jpg', '8.jpg', '25.jpg', '12.jpg', '13.jpg', '14.jpg', '15.jpg', '16.jpg', '27.jpg', '17.jpg', '18.jpg', '19.jpg', '29.jpg', '20.jpg', '21.jpg'];
+var textures = ['1.jpg', '2.jpg', '22.jpg', '4.jpg', '10.jpg', '5.jpg', , '9.jpg', '28.png', '25.jpg', '12.jpg', '13.jpg', '14.jpg', '15.jpg', '16.jpg', '27.jpg', '17.jpg', '18.jpg', '19.jpg', '29.jpg', '20.jpg', '21.jpg'];
 // var textures = ['1.jpg', '2.jpg', '3.jpg','4.jpg'];
 var texture;
 //var x = -0.140, y=0.610, z=2.16499, aa=0, ss=1.3049, dd=0, toggle=false, t, allTextures, song;
