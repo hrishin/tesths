@@ -82,22 +82,33 @@ function main() {
   video1.play();
 
   Promise.all([
-    loader.loadAsync('me_1.glb'),
+    loader.loadAsync('me.glb'),
     loader.loadAsync('you.glb'),
     audioLoader.loadAsync( 'song.mp3'),
   ]).then((results) => {
     // here the models are returned in deterministic order
-    const [beatrice, hrishi, music] = results;
+    const [hrishi, beatrice, music] = results;
     const b = beatrice.scene;
     const h = hrishi.scene;
+    b.traverse(function(object) {
+      if(object.isMesh) {object.castShadow = true}
+    })
+    h.traverse(function(object) {
+      if(object.isMesh) {object.castShadow = true}
+    })
     b.position.x=0.350
     h.position.x=-0.350
     b.position.z=0.3
     h.position.z=0.3
     b.rotation.y=Math.PI
     h.rotation.y=Math.PI
+    let mixer = new THREE.AnimationMixer(b);
+    console.log(hrishi)
+    const animationAction = mixer.clipAction(hrishi.animations[0]);
     scene.add(b);
     scene.add(h);
+    animationAction.fadeIn(1)
+    animationAction.play()
     song = music
     loadTextures()
   }).catch((err) => {
