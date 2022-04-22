@@ -82,7 +82,7 @@ function main() {
   video1.play();
 
   Promise.all([
-    loader.loadAsync('me.glb'),
+    loader.loadAsync('me_1.glb'),
     loader.loadAsync('you.glb'),
     audioLoader.loadAsync( 'song.mp3'),
   ]).then((results) => {
