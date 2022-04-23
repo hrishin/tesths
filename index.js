@@ -6,6 +6,7 @@ var textures = ['1.jpg', '2.jpg', '22.jpg', '10.jpg', '28.png', '25.jpg', '12.jp
 var texture;
 //var x = -0.140, y=0.610, z=2.16499, aa=0, ss=1.3049, dd=0, toggle=false, t, allTextures, song;
 var x = -0.14, y=9.910000000000007, z=-9.485010000000003, aa=0, ss=1.3049, dd=0, toggle=false, t, allTextures, song;
+var animationAction;
 const transition1 = {
   x: -0.14,
   y: 1.910000000000001, 
@@ -96,19 +97,18 @@ function main() {
     h.traverse(function(object) {
       if(object.isMesh) {object.castShadow = true}
     })
-    b.position.x=0.350
-    h.position.x=-0.350
+    b.position.x=-0.350
+    h.position.x=0.350
     b.position.z=0.3
     h.position.z=0.3
     b.rotation.y=Math.PI
     h.rotation.y=Math.PI
-    let mixer = new THREE.AnimationMixer(b);
+    //let mixer = new THREE.AnimationMixer(h);
     console.log(hrishi)
-    const animationAction = mixer.clipAction(hrishi.animations[0]);
+    //animationAction = mixer.clipAction(hrishi.animations[1]);
     scene.add(b);
     scene.add(h);
-    animationAction.fadeIn(1)
-    animationAction.play()
+    //animationAction.play()
     song = music
     loadTextures()
   }).catch((err) => {
